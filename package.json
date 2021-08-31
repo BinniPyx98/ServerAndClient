@@ -1,0 +1,13 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@types/nodemon": "^1.19.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.7.8"
+  }
+}
