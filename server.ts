@@ -11,28 +11,37 @@ http.createServer((req: any, res: any) => {
     if (req.method === 'GET') {
         getHandler(req.headers)
 
-    }
-    else if (req.method === 'POST') {
+    } else if (req.method === 'POST') {
         postHandler(req)
-    }
-    else{
+    } else {
         console.log('Unknown method')
         res.statusCode(500);
     }
 
 
-}).listen(3002)
+}).listen(3007)
 
-function getHandler(requestHeader:any) {
+function getHandler(requestHeader: any) {
 
     if (requestHeader.authorization === 'token') {
         //отдать объект галлереи
     }
 
 }
-function postHandler(request:any){
-    request.on('data', (chunk: any) => {
-        let test = chunk.toString()
-        console.log(test)
+interface d{
+    email:string;
+    password:string;
+}
+async function postHandler(request: any) {
+    let test:d
+    await request.on('data', (chunk: any) => {
+        test = JSON.stringify(chunk)
+        if (userData.hasOwnProperty(test.email)) {
+            console.log(true)
+        }
+
     })
+
+
+
 }
