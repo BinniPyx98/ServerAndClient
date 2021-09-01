@@ -1,12 +1,18 @@
+import {IncomingMessage, ServerResponse} from "http";
+
 const http = require('http')
 
-let userData = {
-    'asergeev@flo.team': 'jgF5tn4F',
+interface test {
+    [name1: string]: string;
+}
+
+let userData: test = {
+    "asergeev@flo.team": 'jgF5tn4F',
     'vkotikov@flo.team': 'po3FGas8',
     'tpupkin@flo.team': 'tpupkin@flo.team'
 }
 
-http.createServer((req: any, res: any) => {
+http.createServer((req: IncomingMessage, res: ServerResponse) => {
 
     if (req.method === 'GET') {
         getHandler(req.headers)
@@ -15,11 +21,9 @@ http.createServer((req: any, res: any) => {
         postHandler(req)
     } else {
         console.log('Unknown method')
-        res.statusCode(500);
     }
 
-
-}).listen(3007)
+}).listen(3000)
 
 function getHandler(requestHeader: any) {
 
@@ -28,20 +32,55 @@ function getHandler(requestHeader: any) {
     }
 
 }
-interface d{
-    email:string;
-    password:string;
+
+interface d {
+    email: string;
+    password: string;
 }
+
 async function postHandler(request: any) {
-    let test:d
+
     await request.on('data', (chunk: any) => {
-        test = JSON.stringify(chunk)
-        if (userData.hasOwnProperty(test.email)) {
-            console.log(true)
-        }
+
+        checkUserAuthorizationData(chunk);
 
     })
+}
+
+function checkUserAuthorizationData(chunk:any) {
+    let userDataFromQuery = JSON.parse(chunk)
+    let userPasswordFromQuery = userDataFromQuery.password
+    let userEmailFromQuery = userDataFromQuery.email
+
+    let emailDbStatus = checkEmailInDB(userEmailFromQuery)
+    let passwordDbStatus = checkPasswordInDB(userPasswordFromQuery, userEmailFromQuery)
+    console.log(emailDbStatus)
+    console.log(passwordDbStatus)
+    let authorizationData = passwordDbStatus && emailDbStatus
+
+    if (authorizationData==true){
+        // send token
+        console.log('its work')
+    }
+    else{
+        console.log('authorization error')
+    }
 
 
+}
 
+function checkEmailInDB(userEmailFromQuery:string) {
+    return userData.hasOwnProperty(userEmailFromQuery)
+}
+
+function checkPasswordInDB(userPasswordFromQuery:string, UserEmailFromQuery:string) {
+    let passwordInDB = userData[UserEmailFromQuery]
+
+    if (passwordInDB === userPasswordFromQuery) {
+
+        return true
+    } else {
+
+        return false
+    }
 }
