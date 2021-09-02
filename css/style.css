@@ -1,0 +1,15 @@
+#gallery img{
+    max-width: 500px;
+}
+button{
+    display:block;
+}
+.hidden{
+display: none;
+}
+.visible{
+visibility: visible;
+}
+.NextBack{
+    display: inline-block;
+}
