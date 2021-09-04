@@ -1,5 +1,4 @@
 import {IncomingMessage, ServerResponse} from "http";
-
 const path = require('path')
 const fs = require('fs')
 const http = require('http')
@@ -8,7 +7,6 @@ let some: any
 interface UserData {
     [name1: string]: string;
 }
-
 let userData: UserData = {
     "asergeev@flo.team": 'jgF5tn4F',
     'vkotikov@flo.team': 'po3FGas8',
@@ -44,6 +42,7 @@ http.createServer((req: IncomingMessage, res: ServerResponse) => {
         res.setHeader("Access-Control-Max-Age", "86400")
         res.setHeader('Access-Control-Allow-Origin', '*')
 
+
         res.writeHead(200)
 
 
@@ -55,12 +54,19 @@ http.createServer((req: IncomingMessage, res: ServerResponse) => {
 
 
 function getHandler(request: any) {
+    let params = request.url.params
+    console.log(params)
     if (request.headers.authorization === 'token') {
         let arr: Array<string> = fs.readdirSync(`img`)
             .map((elem:any) => path.join(`/img/`, elem).toString());
-        console.log(arr)
+        let galleryObj={
+            total:3,
+            page:1,
+            objects:arr
+        }
+        console.log(galleryObj)
 
-        return arr
+        return galleryObj
     }
 }
 
