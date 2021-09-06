@@ -3,19 +3,21 @@ import {IncomingMessage, ServerResponse} from "http";
 const path = require('path')
 const fs = require('fs')
 const http = require('http')
-let postResult: any
 
-interface UserData {
+type AuthResult = string | {token:string} //string if error
+let authResult: AuthResult
+
+interface UserAuthDBData {
     [email: string]: string;
 }
-
-let userData: UserData = {
+let userAuthDBData: UserAuthDBData = {
     "asergeev@flo.team": 'jgF5tn4F',
     'vkotikov@flo.team': 'po3FGas8',
     'tpupkin@flo.team': 'tpupkin@flo.team'
 }
 
 
+//// Run server
 http.createServer((request: IncomingMessage, response: ServerResponse) => {
 
 
@@ -26,58 +28,82 @@ http.createServer((request: IncomingMessage, response: ServerResponse) => {
         setHeaderAndSpendResponse(request, response, postHandler)
 
     } else if (request.method === 'OPTIONS') {
-        response.setHeader('Access-Control-Allow-Methods', "PUT,PATCH,DELETE,POST,GET")
-        response.setHeader("Access-Control-Allow-Headers", "API-Key,Content-Type,If-Modified-Since,Cache-Control,Access-Control-Allow-Methods, Authorization")
-        response.setHeader("Access-Control-Max-Age", "86400")
-        response.setHeader('Access-Control-Allow-Origin', '*')
+        let responseWithAHeader = setHeaderForOptions(response)
 
-        response.writeHead(200)
-        response.end()
+        responseWithAHeader.end()
     }
+
 }).listen(5000)
 
 
-function setHeaderAndSpendResponse(request: IncomingMessage, response: ServerResponse, handler: any) {
+
+function setHeaderForOptions(response:ServerResponse):ServerResponse {
+    response.setHeader('Access-Control-Allow-Methods', "PUT,PATCH,DELETE,POST,GET")
+    response.setHeader("Access-Control-Allow-Headers", "API-Key,Content-Type,If-Modified-Since,Cache-Control,Access-Control-Allow-Methods, Authorization")
+    response.setHeader("Access-Control-Max-Age", "86400")
+    response.setHeader('Access-Control-Allow-Origin', '*')
+
+    response.writeHead(200)
+    return response
+}
+
+function setHeaderAndSpendResponse(request: IncomingMessage, response: ServerResponse, handler: any):void {
     response.setHeader('Access-Control-Allow-Origin', '*');
     (async () => {
-        let handlerResult = await handler(request)
-        response.end(handlerResult)
+        let handlerResult = await handler(request) //handler is either getHandler or postHandler
+        response.end(handlerResult)      //send handlerResult
     })()
 }
 
 
-function getHandler(request: any) {
-    let reqexp = /page=\d/g;
-    let test = /\d/g;
-    const queryObject = request.url.match(reqexp).toString();
-    let pageInUrl = queryObject.match(test)
+
+//////Get Handler
+type GetHandler=string|{
+                         total:number,
+                         page:number,
+                         objects:Array<string>
+                       }
+
+function getHandler(request: IncomingMessage):GetHandler {
+    let regexpFindPageExpression= /page=\d/g;
+    let regexpFindNumberPage = /\d/g;
+
+    const page = String(request.url!.match(regexpFindPageExpression)) // string "page=..."
+    let pageNumber = page.match(regexpFindNumberPage)                  // number
 
     if (request.headers.authorization === 'token') {
-        let arr: Array<string> = fs.readdirSync(`img/page${pageInUrl}`)
-            .map((elem: any) => path.join(`/img/page${pageInUrl}/`, elem).toString());
+        // Read img path
+        let arr: Array<string> = fs.readdirSync(`img/page${pageNumber}`)
+            .map((elem: any) => path.join(`/img/page${pageNumber}/`, elem).toString());
 
         let galleryObj = {
             total: 3,
-            page: Number(pageInUrl),
+            page: Number(pageNumber),
             objects: arr
         }
 
         return JSON.stringify(galleryObj)
-    }else{
+    } else {
         return "Not authorization"
     }
 }
 
-async function postHandler(request: any) {
-    let stringChunk;
+
+///////////Post Handler
+async function postHandler(request: IncomingMessage) {
+    let dataFromChunk;
+
     await request.on('data', (chunk: any) => {
-        stringChunk = chunk.toString()
-        postResult = checkUserAuthorizationData(JSON.parse(stringChunk))
+        dataFromChunk = chunk.toString()
+        authResult = checkUserAuthorizationData(JSON.parse(dataFromChunk))
     })
-    return JSON.stringify(postResult)
+
+    return JSON.stringify(authResult)
 }
 
-function checkUserAuthorizationData(chunk: any) {
+
+//////Authorization
+function checkUserAuthorizationData(chunk: any):AuthResult {
     let userDataFromQuery = chunk
     let userPasswordFromQuery = userDataFromQuery.password
     let userEmailFromQuery = userDataFromQuery.email
@@ -88,22 +114,23 @@ function checkUserAuthorizationData(chunk: any) {
     let authorizationData = passwordDbStatus && emailDbStatus
 
     if (authorizationData == true) {
-        console.log('its work')
+        console.log('successful authorization')
         return {token: "token"}
 
     } else {
         console.log('authorization error')
+        return "authorization error"
     }
 
 
 }
 
-function checkEmailInDB(userEmailFromQuery: string) {
-    return userData.hasOwnProperty(userEmailFromQuery)
+function checkEmailInDB(userEmailFromQuery: string):boolean {
+    return userAuthDBData.hasOwnProperty(userEmailFromQuery)
 }
 
-function checkPasswordInDB(userPasswordFromQuery: string, UserEmailFromQuery: string) {
-    let passwordInDB = userData[UserEmailFromQuery]
+function checkPasswordInDB(userPasswordFromQuery: string, UserEmailFromQuery: string):boolean {
+    let passwordInDB = userAuthDBData[UserEmailFromQuery]
 
     return passwordInDB === userPasswordFromQuery ? true : false
 }
