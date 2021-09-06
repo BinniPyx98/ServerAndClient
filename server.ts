@@ -1,12 +1,14 @@
 import {IncomingMessage, ServerResponse} from "http";
+
 const path = require('path')
 const fs = require('fs')
 const http = require('http')
-let some: any
+let postResult: any
 
 interface UserData {
-    [name1: string]: string;
+    [email: string]: string;
 }
+
 let userData: UserData = {
     "asergeev@flo.team": 'jgF5tn4F',
     'vkotikov@flo.team': 'po3FGas8',
@@ -14,71 +16,65 @@ let userData: UserData = {
 }
 
 
-http.createServer((req: IncomingMessage, res: ServerResponse) => {
-
-    if (req.method === 'GET') {
-        let result = async function () {
-            res.setHeader('Access-Control-Allow-Origin', '*')
-            res.end(JSON.stringify(getHandler(req)))
-
-        }
-        result()
+http.createServer((request: IncomingMessage, response: ServerResponse) => {
 
 
-    } else if (req.method === 'POST') {
+    if (request.method === 'GET') {
+        setHeaderAndSpendResponse(request, response, getHandler)
 
-        let result = async function () {
-            res.setHeader('Access-Control-Allow-Origin', '*')
-            res.end(JSON.stringify(await postHandler(req)))
-        }
-        result()
+    } else if (request.method === 'POST') {
+        setHeaderAndSpendResponse(request, response, postHandler)
 
+    } else if (request.method === 'OPTIONS') {
+        response.setHeader('Access-Control-Allow-Methods', "PUT,PATCH,DELETE,POST,GET")
+        response.setHeader("Access-Control-Allow-Headers", "API-Key,Content-Type,If-Modified-Since,Cache-Control,Access-Control-Allow-Methods, Authorization")
+        response.setHeader("Access-Control-Max-Age", "86400")
+        response.setHeader('Access-Control-Allow-Origin', '*')
 
-    } else if (req.method === 'OPTIONS') {
-        console.log('Options')
-
-        res.setHeader('Access-Control-Allow-Methods', "PUT,PATCH,DELETE,POST,GET")
-        res.setHeader("Access-Control-Allow-Headers", "API-Key,Content-Type,If-Modified-Since,Cache-Control,Access-Control-Allow-Methods, Authorization")
-        res.setHeader("Access-Control-Max-Age", "86400")
-        res.setHeader('Access-Control-Allow-Origin', '*')
-
-
-        res.writeHead(200)
-
-
-        res.end()
-
+        response.writeHead(200)
+        response.end()
     }
-
 }).listen(5000)
 
 
-function getHandler(request: any) {
-    let params = request.url.params
-    console.log(params)
-    if (request.headers.authorization === 'token') {
-        let arr: Array<string> = fs.readdirSync(`img`)
-            .map((elem:any) => path.join(`/img/`, elem).toString());
-        let galleryObj={
-            total:3,
-            page:1,
-            objects:arr
-        }
-        console.log(galleryObj)
+function setHeaderAndSpendResponse(request: IncomingMessage, response: ServerResponse, handler: any) {
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    (async () => {
+        let handlerResult = await handler(request)
+        response.end(handlerResult)
+    })()
+}
 
-        return galleryObj
+
+function getHandler(request: any) {
+    let reqexp = /page=\d/g;
+    let test = /\d/g;
+    const queryObject = request.url.match(reqexp).toString();
+    let pageInUrl = queryObject.match(test)
+
+    if (request.headers.authorization === 'token') {
+        let arr: Array<string> = fs.readdirSync(`img/page${pageInUrl}`)
+            .map((elem: any) => path.join(`/img/page${pageInUrl}/`, elem).toString());
+
+        let galleryObj = {
+            total: 3,
+            page: Number(pageInUrl),
+            objects: arr
+        }
+
+        return JSON.stringify(galleryObj)
+    }else{
+        return "Not authorization"
     }
 }
 
 async function postHandler(request: any) {
-    let c
-    let result = await request.on('data', (chunk: any) => {
-        c = chunk.toString()
-        let a = JSON.parse(c)
-        some = JSON.stringify(checkUserAuthorizationData(a))
+    let stringChunk;
+    await request.on('data', (chunk: any) => {
+        stringChunk = chunk.toString()
+        postResult = checkUserAuthorizationData(JSON.parse(stringChunk))
     })
-
-    return some
+    return JSON.stringify(postResult)
 }
 
 function checkUserAuthorizationData(chunk: any) {
@@ -109,11 +105,5 @@ function checkEmailInDB(userEmailFromQuery: string) {
 function checkPasswordInDB(userPasswordFromQuery: string, UserEmailFromQuery: string) {
     let passwordInDB = userData[UserEmailFromQuery]
 
-    if (passwordInDB === userPasswordFromQuery) {
-
-        return true
-    } else {
-
-        return false
-    }
+    return passwordInDB === userPasswordFromQuery ? true : false
 }
