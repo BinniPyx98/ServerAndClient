@@ -10,20 +10,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 //getGallery main function in file
 export function getGallery() {
     return __awaiter(this, void 0, void 0, function* () {
-        let token = JSON.parse(localStorage.getItem('tokenData'));
+        let token = (localStorage.getItem('tokenData'));
         let resolve = yield fetch(getUrl(), {
             method: "GET",
             headers: {
-                'Authorization': token.token
+                'Authorization': token
             }
         });
         let galleryObject = null;
         let data = yield resolve.json();
         if (data) {
             galleryObject = data;
-            console.log(galleryObject);
         }
-        let A = createGallery(galleryObject);
+        createGallery(galleryObject);
     });
 }
 function getPage() {
@@ -33,7 +32,7 @@ function setPage(num) {
     localStorage.setItem('page', num);
 }
 function getUrl() {
-    return `http://localhost:5000/gallery/page`;
+    return `http://localhost:5000/gallery/page=${getPage()}`;
 }
 function createGallery(galleryObject) {
     clearGallery();
@@ -47,8 +46,8 @@ function clearGallery() {
 }
 function createImg(galleryObject) {
     let divGallery = document.getElementById('gallery');
-    console.log(galleryObject);
-    for (let url of galleryObject) {
+    console.log(galleryObject.objects);
+    for (let url of galleryObject.objects) {
         let img = document.createElement('img');
         img.src = url;
         divGallery.appendChild(img);
@@ -59,8 +58,8 @@ if (clickButtonNext) {
     clickButtonNext.addEventListener('click', ev => {
         ev.preventDefault();
         let page = Number(getPage());
-        if (page >= 5) {
-            setPage(String(5));
+        if (page >= 3) {
+            setPage(String(3));
             updateURL(page);
             alert("It's last page");
         }

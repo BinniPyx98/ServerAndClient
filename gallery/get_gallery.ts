@@ -1,26 +1,21 @@
 //getGallery main function in file
 export async function getGallery(): Promise<void> {
-    
-    let token = JSON.parse(localStorage.getItem('tokenData'));
-    
+    let token = (localStorage.getItem('tokenData'));
     let resolve = await fetch(getUrl(), {
         method: "GET",
         headers: {
-            'Authorization': token.token
+            'Authorization': token
         }
     })
 
     let galleryObject = null;
     let data=await resolve.json()
-  
 
     if (data) {
         galleryObject = data;
-        console.log(galleryObject);
-        
     }
 
-  let A=   createGallery(galleryObject);
+    createGallery(galleryObject);
 }
 
 function getPage(): string | number {
@@ -33,7 +28,7 @@ function setPage(num: string): void {
 
 
 function getUrl(): string {
-    return `http://localhost:5000/gallery/page`;
+    return `http://localhost:5000/gallery/page=${getPage()}`;
 }
 
 
@@ -58,9 +53,9 @@ function clearGallery(): void {
 
 function createImg(galleryObject: any): void {
     let divGallery: HTMLElement = document.getElementById('gallery');
-    console.log(galleryObject);
-    
-    for (let url of galleryObject) {
+    console.log(galleryObject.objects);
+
+    for (let url of galleryObject.objects) {
         let img: HTMLImageElement = document.createElement('img');
         img.src = url;
         divGallery.appendChild(img);
@@ -73,8 +68,8 @@ if (clickButtonNext) {
         ev.preventDefault()
         let page: number = Number(getPage());
 
-        if (page >= 5) {
-            setPage(String(5));
+        if (page >= 3) {
+            setPage(String(3));
             updateURL(page);
             alert("It's last page");
         } else {

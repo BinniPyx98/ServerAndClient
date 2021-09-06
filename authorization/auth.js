@@ -19,6 +19,7 @@ if (clickOnButtonLogIn) {
 function LogIn() {
     return __awaiter(this, void 0, void 0, function* () {
         let result = yield control_validation_authorization();
+        console.log(result);
         if (result) {
             hidden_auth_form();
             getGallery();
@@ -54,7 +55,8 @@ function authorization(userEmail, userPassword) {
     });
 }
 function save_token(token) {
-    localStorage.setItem('tokenData', token);
+    localStorage.setItem('tokenData', token.token);
+    console.log(token.token);
 }
 function server_error(error) {
     alert(error.errorMessage);

@@ -14,7 +14,7 @@ if (clickOnButtonLogIn) {
 async function LogIn(): Promise<void> {
 
     let result: boolean = await control_validation_authorization();
-
+    console.log(result)
     if (result) {
         hidden_auth_form();
         getGallery()
@@ -28,11 +28,11 @@ async function authorization(userEmail: string, userPassword: string): Promise<b
         email: userEmail,
         password: userPassword
     })
-    
+
 
     let resolve = fetch('http://localhost:5000', {
         method: 'POST',
-    
+
         headers: {
             'Access-Control-Allow-Methods':'POST',
             "Content-Type": "application/json"
@@ -43,19 +43,21 @@ async function authorization(userEmail: string, userPassword: string): Promise<b
     let response = await resolve;
 
     if (response.status === 200) {
-        let result: string = await response.json();        
+        let result: string = await response.json();
         save_token(result);
         return true
     } else {
         let result: string = await response.json();
         console.log(  (result));
-      
+
         return false
     }
 }
 
-function save_token(token: string): void {
-    localStorage.setItem('tokenData', token);
+function save_token(token: any): void {
+    localStorage.setItem('tokenData', token.token);
+    console.log(token.token)
+
 }
 
 function server_error(error: any): void {
