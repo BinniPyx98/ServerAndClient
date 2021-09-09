@@ -14,11 +14,10 @@ if(clickOnButtonUpload){
 
 async function Upload(file:any){
     let formData=new FormData();
-    formData.append('photo',file.files[0])
+    formData.append('img',file.files[0])
     if(!file){
         console.log('not file')
     }else{
-        console.log(formData.get('photo'))
         let resolve = await fetch('http://localhost:5400/gallery', {
             method: 'POST',
             headers: {
@@ -26,10 +25,11 @@ async function Upload(file:any){
             },
             body: formData
         })
-        let response=await resolve.json()
-        console.log(response.status)
-    }
+        if(resolve.status==200){
+            //window.location.reload()
 
+        }
+    }
 }
 //Ловит клик событие на кнопке LogIn и является точкой входа
 let clickOnButtonLogIn:HTMLElement = document.getElementById('logIn')

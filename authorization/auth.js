@@ -20,12 +20,11 @@ if (clickOnButtonUpload) {
 function Upload(file) {
     return __awaiter(this, void 0, void 0, function* () {
         let formData = new FormData();
-        formData.append('photo', file.files[0]);
+        formData.append('img', file.files[0]);
         if (!file) {
             console.log('not file');
         }
         else {
-            console.log(formData.get('photo'));
             let resolve = yield fetch('http://localhost:5400/gallery', {
                 method: 'POST',
                 headers: {
@@ -33,8 +32,9 @@ function Upload(file) {
                 },
                 body: formData
             });
-            let response = yield resolve.json();
-            console.log(response.status);
+            if (resolve.status == 200) {
+                //window.location.reload()
+            }
         }
     });
 }
