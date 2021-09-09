@@ -28,7 +28,7 @@ function setPage(num: string): void {
 
 
 function getUrl(): string {
-    return `http://localhost:5000/gallery/page=${getPage()}`;
+    return `http://localhost:5400/gallery?page=${getPage()}`;
 }
 
 
@@ -53,7 +53,6 @@ function clearGallery(): void {
 
 function createImg(galleryObject: any): void {
     let divGallery: HTMLElement = document.getElementById('gallery');
-    console.log(galleryObject.objects);
 
     for (let url of galleryObject.objects) {
         let img: HTMLImageElement = document.createElement('img');

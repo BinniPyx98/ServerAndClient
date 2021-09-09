@@ -1,13 +1,20 @@
 {
-  "name": "server",
+  "name": "module1_part3_gallery",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
-    "@types/nodemon": "^1.19.1"
+    "requirejs": "^2.3.6",
+    "tslint-language-service": "^0.9.9",
+    "typescript": "^4.3.5"
   },
+  "scripts": {
+    "buildTS": "tsc --project tsconfig.json"
+  },
+  "main": "gallery/get_gallery.ts",
+  "repository": "git@github.com:BinniPyx98/module1_part3_gallery.git",
+  "author": "Kalinichenko <aleks.kalinichenko989@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^16.7.8"
+
   }
 }

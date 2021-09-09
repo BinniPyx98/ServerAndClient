@@ -32,7 +32,7 @@ function setPage(num) {
     localStorage.setItem('page', num);
 }
 function getUrl() {
-    return `http://localhost:5000/gallery/page=${getPage()}`;
+    return `http://localhost:5400/gallery?page=${getPage()}`;
 }
 function createGallery(galleryObject) {
     clearGallery();
@@ -46,7 +46,6 @@ function clearGallery() {
 }
 function createImg(galleryObject) {
     let divGallery = document.getElementById('gallery');
-    console.log(galleryObject.objects);
     for (let url of galleryObject.objects) {
         let img = document.createElement('img');
         img.src = url;

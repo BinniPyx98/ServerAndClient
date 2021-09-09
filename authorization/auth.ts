@@ -1,6 +1,36 @@
 import {getGallery} from "../gallery/get_gallery.js";
+let file = <HTMLInputElement>document.getElementById('uploadFile');
+let clickOnButtonUpload:HTMLElement=document.getElementById('uploadButton')
+if(clickOnButtonUpload){
+    clickOnButtonUpload.addEventListener('click',ev=>{
+        ev.preventDefault();
+        console.log('click')
+
+        Upload(file);
 
 
+    })
+}
+
+async function Upload(file:any){
+    let formData=new FormData();
+    formData.append('photo',file.files[0])
+    if(!file){
+        console.log('not file')
+    }else{
+        console.log(formData.get('photo'))
+        let resolve = await fetch('http://localhost:5400/gallery', {
+            method: 'POST',
+            headers: {
+                'Access-Control-Allow-Methods':'POST',
+            },
+            body: formData
+        })
+        let response=await resolve.json()
+        console.log(response.status)
+    }
+
+}
 //Ловит клик событие на кнопке LogIn и является точкой входа
 let clickOnButtonLogIn:HTMLElement = document.getElementById('logIn')
 
@@ -11,6 +41,10 @@ if (clickOnButtonLogIn) {
     })
 }
 
+
+
+
+// @ts-ignore
 async function LogIn(): Promise<void> {
 
     let result: boolean = await control_validation_authorization();
@@ -22,6 +56,7 @@ async function LogIn(): Promise<void> {
     }
 }
 
+// @ts-ignore
 async function authorization(userEmail: string, userPassword: string): Promise<boolean> {
 
     let userJsonDate: any = JSON.stringify({
@@ -30,7 +65,7 @@ async function authorization(userEmail: string, userPassword: string): Promise<b
     })
 
 
-    let resolve = fetch('http://localhost:5000', {
+    let resolve = fetch('http://localhost:5400/auth', {
         method: 'POST',
 
         headers: {
@@ -69,6 +104,7 @@ function getElement(tagId: string): string | void {
     return Element ? Element.value : alert("don't find tag");
 }
 
+// @ts-ignore
 async function control_validation_authorization(): Promise<boolean> {
     let validationResult: boolean = null;
     let authorizationResult: boolean = null;

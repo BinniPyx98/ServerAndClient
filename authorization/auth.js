@@ -8,6 +8,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { getGallery } from "../gallery/get_gallery.js";
+let file = document.getElementById('uploadFile');
+let clickOnButtonUpload = document.getElementById('uploadButton');
+if (clickOnButtonUpload) {
+    clickOnButtonUpload.addEventListener('click', ev => {
+        ev.preventDefault();
+        console.log('click');
+        Upload(file);
+    });
+}
+function Upload(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let formData = new FormData();
+        formData.append('photo', file.files[0]);
+        if (!file) {
+            console.log('not file');
+        }
+        else {
+            console.log(formData.get('photo'));
+            let resolve = yield fetch('http://localhost:5400/gallery', {
+                method: 'POST',
+                headers: {
+                    'Access-Control-Allow-Methods': 'POST',
+                },
+                body: formData
+            });
+            let response = yield resolve.json();
+            console.log(response.status);
+        }
+    });
+}
 //Ловит клик событие на кнопке LogIn и является точкой входа
 let clickOnButtonLogIn = document.getElementById('logIn');
 if (clickOnButtonLogIn) {
@@ -16,6 +46,7 @@ if (clickOnButtonLogIn) {
         LogIn();
     });
 }
+// @ts-ignore
 function LogIn() {
     return __awaiter(this, void 0, void 0, function* () {
         let result = yield control_validation_authorization();
@@ -27,13 +58,14 @@ function LogIn() {
         }
     });
 }
+// @ts-ignore
 function authorization(userEmail, userPassword) {
     return __awaiter(this, void 0, void 0, function* () {
         let userJsonDate = JSON.stringify({
             email: userEmail,
             password: userPassword
         });
-        let resolve = fetch('http://localhost:5000', {
+        let resolve = fetch('http://localhost:5400/auth', {
             method: 'POST',
             headers: {
                 'Access-Control-Allow-Methods': 'POST',
@@ -65,6 +97,7 @@ function getElement(tagId) {
     let Element = document.getElementById(tagId);
     return Element ? Element.value : alert("don't find tag");
 }
+// @ts-ignore
 function control_validation_authorization() {
     return __awaiter(this, void 0, void 0, function* () {
         let validationResult = null;
