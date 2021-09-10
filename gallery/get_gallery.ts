@@ -1,4 +1,43 @@
-//getGallery main function in file
+/*
+Загрузка изображения. Ловим клик по кнопке Upload и запускаем функцию Upload
+ */
+let inputFile = <HTMLInputElement>document.getElementById('uploadFile');
+let clickOnButtonUpload: HTMLElement = document.getElementById('uploadButton')
+
+if (clickOnButtonUpload) {
+    clickOnButtonUpload.addEventListener('click', ev => {
+        ev.preventDefault();
+        (async () => {
+            await Upload(inputFile);
+        })()
+    })
+}
+
+async function Upload(file: any) {
+    let formData = new FormData();
+    formData.append('img', file.files[0])
+
+    if (!file) {
+        console.log('not file')
+    } else {
+        let resolve = await fetch(`http://localhost:5400/gallery?page=${getPage()}`, {
+            method: 'POST',
+            headers: {
+                'Access-Control-Allow-Methods': 'POST',
+            },
+            body: formData
+        })
+        if (resolve.status == 200) {
+            //window.location.reload()
+
+        }
+    }
+}
+
+
+/*
+ Create Gallery
+ */
 export async function getGallery(): Promise<void> {
     let token = (localStorage.getItem('tokenData'));
     let resolve = await fetch(getUrl(), {
@@ -9,7 +48,7 @@ export async function getGallery(): Promise<void> {
     })
 
     let galleryObject = null;
-    let data=await resolve.json()
+    let data = await resolve.json()
 
     if (data) {
         galleryObject = data;
@@ -18,37 +57,10 @@ export async function getGallery(): Promise<void> {
     createGallery(galleryObject);
 }
 
-function getPage(): string | number {
-    return localStorage.getItem('page') ? localStorage.getItem('page') : 1;
-}
-
-function setPage(num: string): void {
-    localStorage.setItem('page', num);
-}
-
-
-function getUrl(): string {
-    return `http://localhost:5400/gallery?page=${getPage()}`;
-}
-
-
-interface gallery {
-    objects: string[];
-    total: number;
-    page: number;
-}
 
 function createGallery(galleryObject: any): void {
     clearGallery();
     createImg(galleryObject);
-}
-
-function clearGallery(): void {
-    let divGallery: HTMLElement = document.getElementById('gallery');
-
-    while (divGallery.firstChild) {
-        divGallery.removeChild(divGallery.firstChild);
-    }
 }
 
 function createImg(galleryObject: any): void {
@@ -61,7 +73,51 @@ function createImg(galleryObject: any): void {
     }
 }
 
+
+/*
+Delete gallery
+ */
+function clearGallery(): void {
+    let divGallery: HTMLElement = document.getElementById('gallery');
+
+    while (divGallery.firstChild) {
+        divGallery.removeChild(divGallery.firstChild);
+    }
+}
+
+/*
+Get function
+ */
+function getPage(): string | number {
+    return localStorage.getItem('page') ? localStorage.getItem('page') : 1;
+}
+
+function getUrl(): string {
+    return `http://localhost:5400/gallery?page=${getPage()}`;
+}
+
+
+/*
+Update function
+ */
+function updateURL(page: number): void {
+    window.history.pushState(window.location.href, null, `gallery?page=${page}`);
+}
+
+
+/*
+Set function
+ */
+function setPage(num: string): void {
+    localStorage.setItem('page', num);
+}
+
+
+/*
+Catch click button "Next"
+ */
 let clickButtonNext = document.getElementById('next')
+
 if (clickButtonNext) {
     clickButtonNext.addEventListener('click', ev => {
         ev.preventDefault()
@@ -80,8 +136,11 @@ if (clickButtonNext) {
 
 }
 
-//Отслеживаем нажатие на кнопку back
+/*
+Catch click button "Back"
+ */
 let clickButtonBack = document.getElementById('back')
+
 if (clickButtonBack) {
     clickButtonBack.addEventListener('click', ev => {
         ev.preventDefault()
@@ -99,8 +158,6 @@ if (clickButtonBack) {
     })
 }
 
-function updateURL(page: number): void {
-    window.history.pushState(window.location.href, null, `gallery?page=${page}`);
-}
+
 
 

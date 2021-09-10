@@ -7,7 +7,43 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-//getGallery main function in file
+/*
+Загрузка изображения. Ловим клик по кнопке Upload и запускаем функцию Upload
+ */
+let inputFile = document.getElementById('uploadFile');
+let clickOnButtonUpload = document.getElementById('uploadButton');
+if (clickOnButtonUpload) {
+    clickOnButtonUpload.addEventListener('click', ev => {
+        ev.preventDefault();
+        (() => __awaiter(void 0, void 0, void 0, function* () {
+            yield Upload(inputFile);
+        }))();
+    });
+}
+function Upload(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let formData = new FormData();
+        formData.append('img', file.files[0]);
+        if (!file) {
+            console.log('not file');
+        }
+        else {
+            let resolve = yield fetch(`http://localhost:5400/gallery?page=${getPage()}`, {
+                method: 'POST',
+                headers: {
+                    'Access-Control-Allow-Methods': 'POST',
+                },
+                body: formData
+            });
+            if (resolve.status == 200) {
+                //window.location.reload()
+            }
+        }
+    });
+}
+/*
+ Create Gallery
+ */
 export function getGallery() {
     return __awaiter(this, void 0, void 0, function* () {
         let token = (localStorage.getItem('tokenData'));
@@ -25,24 +61,9 @@ export function getGallery() {
         createGallery(galleryObject);
     });
 }
-function getPage() {
-    return localStorage.getItem('page') ? localStorage.getItem('page') : 1;
-}
-function setPage(num) {
-    localStorage.setItem('page', num);
-}
-function getUrl() {
-    return `http://localhost:5400/gallery?page=${getPage()}`;
-}
 function createGallery(galleryObject) {
     clearGallery();
     createImg(galleryObject);
-}
-function clearGallery() {
-    let divGallery = document.getElementById('gallery');
-    while (divGallery.firstChild) {
-        divGallery.removeChild(divGallery.firstChild);
-    }
 }
 function createImg(galleryObject) {
     let divGallery = document.getElementById('gallery');
@@ -52,6 +73,39 @@ function createImg(galleryObject) {
         divGallery.appendChild(img);
     }
 }
+/*
+Delete gallery
+ */
+function clearGallery() {
+    let divGallery = document.getElementById('gallery');
+    while (divGallery.firstChild) {
+        divGallery.removeChild(divGallery.firstChild);
+    }
+}
+/*
+Get function
+ */
+function getPage() {
+    return localStorage.getItem('page') ? localStorage.getItem('page') : 1;
+}
+function getUrl() {
+    return `http://localhost:5400/gallery?page=${getPage()}`;
+}
+/*
+Update function
+ */
+function updateURL(page) {
+    window.history.pushState(window.location.href, null, `gallery?page=${page}`);
+}
+/*
+Set function
+ */
+function setPage(num) {
+    localStorage.setItem('page', num);
+}
+/*
+Catch click button "Next"
+ */
 let clickButtonNext = document.getElementById('next');
 if (clickButtonNext) {
     clickButtonNext.addEventListener('click', ev => {
@@ -69,7 +123,9 @@ if (clickButtonNext) {
         }
     });
 }
-//Отслеживаем нажатие на кнопку back
+/*
+Catch click button "Back"
+ */
 let clickButtonBack = document.getElementById('back');
 if (clickButtonBack) {
     clickButtonBack.addEventListener('click', ev => {
@@ -86,8 +142,5 @@ if (clickButtonBack) {
             (() => getGallery())();
         }
     });
-}
-function updateURL(page) {
-    window.history.pushState(window.location.href, null, `gallery?page=${page}`);
 }
 //# sourceMappingURL=get_gallery.js.map

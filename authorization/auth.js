@@ -8,37 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { getGallery } from "../gallery/get_gallery.js";
-let file = document.getElementById('uploadFile');
-let clickOnButtonUpload = document.getElementById('uploadButton');
-if (clickOnButtonUpload) {
-    clickOnButtonUpload.addEventListener('click', ev => {
-        ev.preventDefault();
-        console.log('click');
-        Upload(file);
-    });
-}
-function Upload(file) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let formData = new FormData();
-        formData.append('img', file.files[0]);
-        if (!file) {
-            console.log('not file');
-        }
-        else {
-            let resolve = yield fetch('http://localhost:5400/gallery', {
-                method: 'POST',
-                headers: {
-                    'Access-Control-Allow-Methods': 'POST',
-                },
-                body: formData
-            });
-            if (resolve.status == 200) {
-                //window.location.reload()
-            }
-        }
-    });
-}
-//Ловит клик событие на кнопке LogIn и является точкой входа
+/*
+Catch click on button "LogIn" and start function LogIn
+ */
 let clickOnButtonLogIn = document.getElementById('logIn');
 if (clickOnButtonLogIn) {
     clickOnButtonLogIn.addEventListener('click', ev => {
@@ -46,11 +18,12 @@ if (clickOnButtonLogIn) {
         LogIn();
     });
 }
-// @ts-ignore
+/*
+Main function for authorization.Run after click
+ */
 function LogIn() {
     return __awaiter(this, void 0, void 0, function* () {
         let result = yield control_validation_authorization();
-        console.log(result);
         if (result) {
             hidden_auth_form();
             getGallery();
@@ -58,46 +31,6 @@ function LogIn() {
         }
     });
 }
-// @ts-ignore
-function authorization(userEmail, userPassword) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let userJsonDate = JSON.stringify({
-            email: userEmail,
-            password: userPassword
-        });
-        let resolve = fetch('http://localhost:5400/auth', {
-            method: 'POST',
-            headers: {
-                'Access-Control-Allow-Methods': 'POST',
-                "Content-Type": "application/json"
-            },
-            body: userJsonDate
-        });
-        let response = yield resolve;
-        if (response.status === 200) {
-            let result = yield response.json();
-            save_token(result);
-            return true;
-        }
-        else {
-            let result = yield response.json();
-            console.log((result));
-            return false;
-        }
-    });
-}
-function save_token(token) {
-    localStorage.setItem('tokenData', token.token);
-    console.log(token.token);
-}
-function server_error(error) {
-    alert(error.errorMessage);
-}
-function getElement(tagId) {
-    let Element = document.getElementById(tagId);
-    return Element ? Element.value : alert("don't find tag");
-}
-// @ts-ignore
 function control_validation_authorization() {
     return __awaiter(this, void 0, void 0, function* () {
         let validationResult = null;
@@ -117,6 +50,47 @@ function control_validation_authorization() {
         }
         return validationResult && authorizationResult;
     });
+}
+function getElement(tagId) {
+    let Element = document.getElementById(tagId);
+    return Element ? Element.value : alert("don't find tag");
+}
+function authorization(userEmail, userPassword) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let resolve = yield sendAuthData(userEmail, userPassword);
+        let token = yield resolve.json();
+        if (resolve.status === 200) {
+            let result = token;
+            save_token(result);
+            return true;
+        }
+        else {
+            let result = token;
+            console.log((result));
+            return false;
+        }
+    });
+}
+function sendAuthData(userEmail, userPassword) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let userJsonDate = JSON.stringify({
+            email: userEmail,
+            password: userPassword
+        });
+        let resolve = yield fetch('http://localhost:5400/auth', {
+            method: 'POST',
+            headers: {
+                'Access-Control-Allow-Methods': 'POST',
+                "Content-Type": "application/json"
+            },
+            body: userJsonDate
+        });
+        return resolve;
+    });
+}
+function save_token(token) {
+    localStorage.setItem('tokenData', token.token);
+    console.log(token.token);
 }
 function removeToken() {
     localStorage.removeItem('tokenData');
