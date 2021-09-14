@@ -7,8 +7,8 @@ let clickOnButtonLogIn: HTMLElement = document.getElementById('logIn')
 
 if (clickOnButtonLogIn) {
     clickOnButtonLogIn.addEventListener('click', ev => {
-        ev.preventDefault()
-        LogIn()
+        ev.preventDefault();
+        (async ()=>{await LogIn()})()
     })
 }
 

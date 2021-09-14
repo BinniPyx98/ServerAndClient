@@ -15,7 +15,7 @@ let clickOnButtonLogIn = document.getElementById('logIn');
 if (clickOnButtonLogIn) {
     clickOnButtonLogIn.addEventListener('click', ev => {
         ev.preventDefault();
-        LogIn();
+        (() => __awaiter(void 0, void 0, void 0, function* () { yield LogIn(); }))();
     });
 }
 /*
